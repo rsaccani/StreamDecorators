@@ -317,16 +317,16 @@ class CharsetConverter
         if ($str !== '') {
             if ($fromMbSupported && !$toMbSupported) {
                 $str = mb_convert_encoding($str, 'UTF-8', $from);
-                $_str = iconv('UTF-8', $to . '//TRANSLIT//IGNORE', $str);
+                $_str = @iconv('UTF-8', $to . '//TRANSLIT//IGNORE', $str);
                 return $_str ? $_str : $str;
             } elseif (!$fromMbSupported && $toMbSupported) {
-                $_str = iconv($from, 'UTF-8//TRANSLIT//IGNORE', $str);
+                $_str = @iconv($from, 'UTF-8//TRANSLIT//IGNORE', $str);
                 $str = $_str ? $_str : $str;
                 return mb_convert_encoding($str, $to, 'UTF-8');
             } elseif ($fromMbSupported && $toMbSupported) {
                 return mb_convert_encoding($str, $to, $from);
             }
-            $_str = iconv($from, $to . '//TRANSLIT//IGNORE', $str);
+            $_str = @iconv($from, $to . '//TRANSLIT//IGNORE', $str);
             return $_str ? $_str : $str;
         }
         return $str;
@@ -347,7 +347,8 @@ class CharsetConverter
         if ($mbSupported) {
             return mb_strlen($str, $cs);
         }
-        return iconv_strlen($str, $cs);
+        $length = @iconv_strlen($str, $cs);
+        return $length ? $length : strlen($str);
     }
 
     /**
@@ -368,9 +369,11 @@ class CharsetConverter
             return mb_substr($str, $start, $length, $cs);
         }
         if ($length === null) {
-            $length = iconv_strlen($str, $cs);
+            $length = @iconv_strlen($str, $cs);
+            $length = $length ? $length : strlen($str);
         }
-        return iconv_substr($str, $start, $length, $cs);
+        $substr = @iconv_substr($str, $start, $length, $cs);
+        return $substr ? $substr : substr($str, $start, $length);
     }
 
     /**
