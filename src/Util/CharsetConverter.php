@@ -296,6 +296,16 @@ class CharsetConverter
      */
     public function convert($str, $fromCharset, $toCharset)
     {
+        if (stripos($fromCharset, 'utf-8') || stripos($fromCharset, 'utf8')) {
+            $fromCharset = 'UTF-8';
+        }
+        if ($fromCharset == $toCharset){
+            return $str;
+        }
+        if ($fromCharset == 'UTF-8' && $toCharset == 'ISO-8859-I'){
+            return $str;
+        }
+
         // there may be some mb-supported encodings not supported by iconv (on my libiconv for instance
         // HZ isn't supported), and so it may happen that failing an mb_convert_encoding, an iconv
         // may also fail even though both support an encoding separately.
@@ -307,14 +317,17 @@ class CharsetConverter
         if ($str !== '') {
             if ($fromMbSupported && !$toMbSupported) {
                 $str = mb_convert_encoding($str, 'UTF-8', $from);
-                return iconv('UTF-8', $to . '//TRANSLIT//IGNORE', $str);
+                $_str = iconv('UTF-8', $to . '//TRANSLIT//IGNORE', $str);
+                return $_str ? $_str : $str;
             } elseif (!$fromMbSupported && $toMbSupported) {
-                $str = iconv($from, 'UTF-8//TRANSLIT//IGNORE', $str);
+                $_str = iconv($from, 'UTF-8//TRANSLIT//IGNORE', $str);
+                $str = $_str ? $_str : $str;
                 return mb_convert_encoding($str, $to, 'UTF-8');
             } elseif ($fromMbSupported && $toMbSupported) {
                 return mb_convert_encoding($str, $to, $from);
             }
-            return iconv($from, $to . '//TRANSLIT//IGNORE', $str);
+            $_str = iconv($from, $to . '//TRANSLIT//IGNORE', $str);
+            return $_str ? $_str : $str;
         }
         return $str;
     }
@@ -395,6 +408,9 @@ class CharsetConverter
      */
     private function findSupportedCharset($cs, &$mbSupported)
     {
+        if (stripos($cs, 'utf-8') || stripos($cs, 'utf8')) {
+            $cs = 'UTF-8';
+        }
         $mbSupported = true;
         $comp = strtoupper($cs);
         $available = array_map('strtoupper', mb_list_encodings());
