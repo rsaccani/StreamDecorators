@@ -1,5 +1,5 @@
 {
-    "name": "zbateson/stream-decorators",
+    "name": "rsaccani/stream-decorators",
     "description": "PHP psr7 stream decorators for mime message part streams",
     "keywords": ["psr7", "stream", "decorators", "mail", "mime"],
     "homepage": "https://github.com/zbateson/StreamDecorators",
